@@ -1,6 +1,7 @@
-use crate::git_client::{self};
+use eyre::{Ok, Result};
 
-pub fn create(git_client: &impl git_client::GitClient) {
-    git_client.interactive_commit();
-    git_client.checkout("main")
+use crate::{git_client::GitClient, project::settings::ProjectSettings};
+
+pub fn create(git_client: &impl GitClient, project_settings: &mut ProjectSettings) -> Result<()> {
+    Ok(())
 }
