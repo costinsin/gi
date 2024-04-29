@@ -3,15 +3,28 @@ use dialoguer::theme::ColorfulTheme;
 use eyre::{eyre, Ok, Result};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::{path::Path, sync::Mutex};
+use std::{
+    path::Path,
+    sync::{Mutex, MutexGuard},
+};
+
+use crate::IssueError;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ProjectSettings {
     trunk: Option<String>,
 }
 
-pub static PROJECT_SETTINGS: Lazy<Mutex<ProjectSettings>> =
+static PROJECT_SETTINGS: Lazy<Mutex<ProjectSettings>> =
     Lazy::new(|| Mutex::new(ProjectSettings::load().unwrap()));
+
+pub fn get_project_settings() -> Result<MutexGuard<'static, ProjectSettings>> {
+    let guard = PROJECT_SETTINGS
+        .lock()
+        .to_issue_error("Failed to get project settings lock")?;
+
+    Ok(guard)
+}
 
 impl ProjectSettings {
     fn load() -> Result<Self> {
