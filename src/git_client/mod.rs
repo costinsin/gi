@@ -1,4 +1,5 @@
 use crate::IssueError;
+use crate::git_provider::SupportedProviders;
 
 use self::git_cli::GitCli;
 use eyre::Result;
@@ -10,7 +11,7 @@ pub mod git_cli;
 pub trait GitClient: Send + Sync {
     fn interactive_commit(&self);
     fn checkout(&self, branch: &str);
-    fn get_repo_info(&self) -> Result<(String, String, String)>;
+    fn get_repo_info(&self) -> Result<(SupportedProviders, String, String)>;
 }
 
 static GIT_CLIENT: Lazy<Mutex<Box<dyn GitClient>>> =

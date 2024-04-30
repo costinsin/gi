@@ -1,9 +1,10 @@
 use std::process;
 
-use color_eyre::Section;
-use eyre::{Context, Result};
-
 use super::GitClient;
+use crate::git_provider::{get_provider_enum, SupportedProviders};
+use color_eyre::Section;
+use eyre::{Context, ContextCompat, Result};
+use regex::Regex;
 
 pub struct GitCli {}
 
@@ -48,10 +49,9 @@ impl GitClient for GitCli {
     ///
     /// * The `git` command fails to execute.
     /// * The current directory is not a Git repository.
-    fn get_repo_info(&self) -> Result<(String, String, String)> {
+    fn get_repo_info(&self) -> Result<(SupportedProviders, String, String)> {
         let out = process::Command::new("git")
-            .arg("remote")
-            .arg("-v")
+            .args(["remote", "-v"])
             .output()
             .context("Failed to get git remote")
             .suggestion("Make sure you are inside a git repository")?
@@ -60,14 +60,26 @@ impl GitClient for GitCli {
             .map(|&c| c as char)
             .collect::<String>();
 
-        let mut parts = out
-            .split(['/', '@', ':', '.'])
-            .collect::<Vec<&str>>();
-        parts.retain(|&s| !s.is_empty());
+        let is_https = match out.lines().next() {
+            Some(line) => line.contains("https"),
+            None => Err(eyre::eyre!("Unexpected git remote output"))
+                .suggestion("Please check the connection to your remote repository")?,
+        };
 
-        let provider = parts[1].to_string();
-        let owner = parts[3].to_string();
-        let repo = parts[4].to_string();
+        let regex = if is_https {
+            Regex::new(r"https://(?P<provider>[^\.]+).*/(?P<owner>.+)/(?P<repo>.+).git").unwrap()
+        } else {
+            Regex::new(r"@(?P<provider>[^\.]+).*:(?P<owner>.+)/(?P<repo>.+).git").unwrap()
+        };
+
+        let captures = regex
+            .captures(&out)
+            .context("Unrecognised git repository URL format")
+            .suggestion("Use a HTTPS or SSH git repository URL")?;
+
+        let provider = get_provider_enum(captures.name("provider").unwrap().as_str())?;
+        let owner = captures.name("owner").unwrap().as_str().to_string();
+        let repo = captures.name("repo").unwrap().as_str().to_string();
 
         Ok((provider, owner, repo))
     }
