@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use color_eyre::Section;
 use eyre::Result;
 
@@ -25,5 +27,24 @@ impl GitClient for GitCli {
 
     fn checkout(&self, branch: &str) {
         println!("Checking out branch: {}", branch);
+    }
+
+    fn get_repository_root(&self) -> Option<String> {
+        let root = Command::new("git")
+            .args(["rev-parse", "--show-toplevel"])
+            .output();
+
+        match root {
+            Ok(output) => Some(
+                output
+                    .stdout
+                    .iter()
+                    .map(|&c| c as char)
+                    .collect::<String>()
+                    .trim()
+                    .to_string(),
+            ),
+            Err(_) => None,
+        }
     }
 }
