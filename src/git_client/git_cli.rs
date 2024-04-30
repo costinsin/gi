@@ -1,12 +1,9 @@
-use std::process::Command;
-use color_eyre::Section;
-use eyre::Result;
-
 use super::GitClient;
 use crate::git_provider::{get_provider_enum, SupportedProviders};
 use color_eyre::Section;
 use eyre::{Context, ContextCompat, Result};
 use regex::Regex;
+use std::process::Command;
 
 pub struct GitCli {}
 
@@ -51,7 +48,7 @@ impl GitClient for GitCli {
     ///
     /// * The `git` command fails to execute.
     /// * The current directory is not a Git repository.
-    fn get_repo_info(&self) -> Result<(SupportedProviders, String, String)> {
+    fn get_repository_info(&self) -> Result<(SupportedProviders, String, String)> {
         let out = Command::new("git")
             .args(["remote", "-v"])
             .output()
@@ -84,8 +81,8 @@ impl GitClient for GitCli {
         let repo = captures.name("repo").unwrap().as_str().to_string();
 
         Ok((provider, owner, repo))
-  }
-     
+    }
+
     fn get_repository_root(&self) -> Option<String> {
         let root = Command::new("git")
             .args(["rev-parse", "--show-toplevel"])
