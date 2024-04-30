@@ -13,4 +13,6 @@ pub struct Args {
 pub enum Commands {
     #[clap(aliases = &["c"])]
     Create,
+    #[clap(aliases = &["s"])]
+    Submit,
 }
