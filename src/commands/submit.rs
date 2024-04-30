@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub async fn submit() -> Result<()> {
-    let (provider, owner, repo) = git_client::get_git_client()?.get_repo_info()?;
+    let (provider, owner, repo) = git_client::get_git_client()?.get_repository_info()?;
     let provider_obj = provider_factory(&provider)?;
     let trunk = get_project_settings()?.get_trunk()?;
 
