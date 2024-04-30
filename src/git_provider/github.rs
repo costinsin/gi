@@ -12,14 +12,21 @@ impl GitHub {
 }
 
 impl GitProvider for GitHub {
-    async fn create_pull_request(&self, trunk: String) -> Result<()> {
+    async fn create_pull_request(
+        &self,
+        owner: &String,
+        repo: &String,
+        trunk: &String,
+    ) -> Result<()> {
+        println!("Creating pull request");
+
         let octocrab = octocrab::Octocrab::builder()
             .build()
             .context("Failed to create octocrab instance")
             .suggestion("Please check your GitHub credentials")?;
 
         let _pr = octocrab
-            .pulls("owner", "repo")
+            .pulls(owner, repo)
             .create("title", "head", trunk)
             .body("hello world!")
             .send()
