@@ -1,4 +1,6 @@
-use std::process;
+use std::process::Command;
+use color_eyre::Section;
+use eyre::Result;
 
 use super::GitClient;
 use crate::git_provider::{get_provider_enum, SupportedProviders};
@@ -50,7 +52,7 @@ impl GitClient for GitCli {
     /// * The `git` command fails to execute.
     /// * The current directory is not a Git repository.
     fn get_repo_info(&self) -> Result<(SupportedProviders, String, String)> {
-        let out = process::Command::new("git")
+        let out = Command::new("git")
             .args(["remote", "-v"])
             .output()
             .context("Failed to get git remote")
@@ -82,5 +84,24 @@ impl GitClient for GitCli {
         let repo = captures.name("repo").unwrap().as_str().to_string();
 
         Ok((provider, owner, repo))
+  }
+     
+    fn get_repository_root(&self) -> Option<String> {
+        let root = Command::new("git")
+            .args(["rev-parse", "--show-toplevel"])
+            .output();
+
+        match root {
+            Ok(output) => Some(
+                output
+                    .stdout
+                    .iter()
+                    .map(|&c| c as char)
+                    .collect::<String>()
+                    .trim()
+                    .to_string(),
+            ),
+            Err(_) => None,
+        }
     }
 }
