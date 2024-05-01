@@ -77,17 +77,17 @@ impl ProjectSettings {
     }
 
     fn save(&self) -> Result<()> {
-        let content = serde_json::to_string(self)?;
-
         let Some(repository_root) = get_git_client()?.get_repository_root() else {
             return Err(eyre!("You are not inside a git repository.").suggestion(
                 "Run `gi` inside a git repository or run `git init` to create a new one.",
             ));
         };
 
+        let json_settings = serde_json::to_string(self)?;
+
         std::fs::write(
-            Path::new(&repository_root).join(".git/gi_project_config"),
-            content,
+            Path::new(&repository_root).join(".git/.gi_project_config"),
+            json_settings,
         )
         .context("Failed to save project settings")
         .suggestion("Check if you have write permissions to the .git directory.")?;
