@@ -24,13 +24,10 @@ impl fmt::Display for SupportedProviders {
 
 impl SupportedProviders {
     pub fn get_providers() -> String {
-        let mut s = String::new();
-
-        for provider in SupportedProviders::iter() {
-            s.push_str(&format!("{}, ", provider));
-        }
-
-        s[..s.len() - 2].to_string()
+        SupportedProviders::iter()
+            .map(|p| p.to_string())
+            .collect::<Vec<String>>()
+            .join(", ")
     }
 }
 
