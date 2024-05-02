@@ -13,6 +13,7 @@ pub trait GitClient: Send + Sync {
     fn checkout(&self, branch: &str);
     fn get_repository_info(&self) -> Result<(SupportedProviders, String, String)>;
     fn get_repository_root(&self) -> Option<String>;
+    fn get_current_branch(&self) -> Option<String>;
 }
 
 static GIT_CLIENT: Lazy<Mutex<Box<dyn GitClient>>> =
