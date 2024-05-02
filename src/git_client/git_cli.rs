@@ -101,4 +101,20 @@ impl GitClient for GitCli {
             Err(_) => None,
         }
     }
+
+    fn get_current_branch(&self) -> Option<String> {
+        let branch = Command::new("git")
+            .args(["symbolic-ref", "-q", "--short", "HEAD"])
+            .output();
+
+        match branch {
+            Ok(output) => match output.status.code() {
+                Some(0) => String::from_utf8(output.stdout)
+                    .map(|s| s.trim().to_string())
+                    .ok(),
+                _ => None,
+            },
+            Err(_) => None,
+        }
+    }
 }
