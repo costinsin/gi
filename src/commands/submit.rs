@@ -1,7 +1,10 @@
 use color_eyre::Section;
 use eyre::{Ok, OptionExt, Result};
 
-use crate::{git_client, git_provider::provider_factory, project::settings::get_project_settings};
+use crate::{
+    git_client, git_provider::provider_factory, git_provider::GitProvider,
+    project::settings::get_project_settings,
+};
 
 pub async fn submit() -> Result<()> {
     let git_client = git_client::get_git_client()?;

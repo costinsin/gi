@@ -71,9 +71,9 @@ impl GitClient for GitCli {
     }
 
     fn get_repository_info(&self) -> Result<(SupportedProviders, String, String)> {
-        // Executes the `git remote -v` command to get information about the remote repository.
+        // Executes the `git config --get remote.origin.url` command to get the URL of the remote repository.
         let out = Command::new("git")
-            .args(["remote", "-v"])
+            .args(["config", "--get", "remote.origin.url"])
             .output()
             .context("Failed to get git remote")
             .suggestion("Make sure you are inside a git repository")?
@@ -82,11 +82,7 @@ impl GitClient for GitCli {
             .map(|&c| c as char)
             .collect::<String>();
 
-        let is_https = match out.lines().next() {
-            Some(line) => line.contains("https"),
-            None => Err(eyre::eyre!("Unexpected git remote output"))
-                .suggestion("Please check the connection to your remote repository")?,
-        };
+        let is_https = out.starts_with("https");
 
         // Parses the remote repository URL to extract the provider, owner, and repository name.
         let regex = if is_https {
