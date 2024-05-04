@@ -14,9 +14,11 @@ pub async fn submit() -> Result<()> {
         .ok_or_eyre("Failed to get the current branch")
         .suggestion("Check whether you are checked out onto a branch")?;
     let title = branch.clone();
-    let trunk = get_project_settings()?.get_trunk()?;
-
     let (provider, owner, repo) = git_client.get_repository_info()?;
+
+    drop(git_client);
+
+    let trunk = get_project_settings()?.get_trunk()?;
     let provider_obj = provider_factory(&provider)?;
 
     provider_obj
