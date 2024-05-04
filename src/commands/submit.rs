@@ -20,7 +20,7 @@ pub async fn submit() -> Result<()> {
     let provider_obj = provider_factory(&provider)?;
 
     provider_obj
-        .create_pull_request(&title, &branch, &owner, &repo, &trunk)
+        .create_pull_request(&owner, &repo, &title, &branch, &trunk)
         .await?;
 
     Ok(())
