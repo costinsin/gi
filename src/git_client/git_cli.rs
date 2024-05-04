@@ -173,6 +173,35 @@ impl GitClient for GitCli {
         Ok(())
     }
 
+    fn get_working_area(&self) -> Result<super::WorkingArea> {
+        let staged = Command::new("git")
+            .args(["diff", "--name-only", "--staged"])
+            .output()
+            .context("Failed to get working area status")?;
+
+        let staged_files = String::from_utf8(staged.stdout)
+            .context("Failed to parse staged files")?
+            .lines()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        let unstaged = Command::new("git")
+            .args(["diff", "--name-only"])
+            .output()
+            .context("Failed to get working area status")?;
+
+        let unstaged_files = String::from_utf8(unstaged.stdout)
+            .context("Failed to parse unstaged files")?
+            .lines()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        Ok(super::WorkingArea {
+            staged_files,
+            unstaged_files,
+        })
+    }
+
     fn create_blob(&self, content: &str) -> Result<String> {
         // Executes the `git hash-object -w --stdin` command to create a blob object.
         let mut child = Command::new("git")
