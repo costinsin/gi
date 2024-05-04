@@ -89,6 +89,28 @@ pub trait GitClient: Send + Sync {
     ///
     /// A `Result` indicating success or failure.
     fn delete_branch(&self, branch: &str) -> Result<()>;
+
+    /// Creates a new blob with the specified content.
+    ///
+    /// # Arguments
+    ///
+    /// * `content` - The content of the blob.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the ID of the created blob on success, or an error on failure.
+    fn create_blob(&self, content: &str) -> Result<String>;
+
+    /// Reads the object with the specified ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `oid` - The ID of the object to read.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the content of the object on success, or an error on failure.
+    fn read_object(&self, oid: &str) -> Result<String>;
 }
 
 static GIT_CLIENT: Lazy<Mutex<Box<dyn GitClient>>> =

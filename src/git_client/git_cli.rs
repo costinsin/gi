@@ -1,9 +1,9 @@
 use super::{CommitStatus, GitClient};
 use crate::git_provider::{get_provider_enum, SupportedProviders};
 use color_eyre::Section;
-use eyre::{Context, ContextCompat, Result};
+use eyre::{Context, ContextCompat, OptionExt, Result};
 use regex::Regex;
-use std::process::Command;
+use std::{io::Write, process::Command};
 
 pub struct GitCli {}
 
@@ -171,5 +171,43 @@ impl GitClient for GitCli {
         }
 
         Ok(())
+    }
+
+    fn create_blob(&self, content: &str) -> Result<String> {
+        // Executes the `git hash-object -w --stdin` command to create a blob object.
+        let mut child = Command::new("git")
+            .args(["hash-object", "-w", "--stdin"])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .spawn()?;
+
+        child
+            .stdin
+            .take()
+            .ok_or_eyre("Could not open stdin for git hash-object")?
+            .write_all(content.as_bytes())?;
+
+        let hash = child
+            .wait_with_output()
+            .context("Failed to read blob hash")?
+            .stdout;
+
+        let hash = String::from_utf8(hash)
+            .map(|s| s.trim().to_string())
+            .context("Failed to parse blob hash")?;
+
+        Ok(hash)
+    }
+
+    fn read_object(&self, oid: &str) -> Result<String> {
+        // Executes the `git cat-file -p <oid>` command to read the object with the specified OID.
+        let output = Command::new("git")
+            .args(["cat-file", "-p", oid])
+            .output()
+            .context("Failed to read object")?;
+
+        let content = String::from_utf8(output.stdout).context("Failed to parse object content")?;
+
+        Ok(content)
     }
 }
