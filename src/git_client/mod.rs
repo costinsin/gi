@@ -13,14 +13,81 @@ pub enum CommitStatus {
     Aborted,
 }
 
+/// The `GitClient` trait defines the interface for interacting with a Git repository.
 pub trait GitClient: Send + Sync {
+    /// Performs an interactive commit.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the commit status on success, or an error on failure.
     fn interactive_commit(&self) -> Result<CommitStatus>;
+
+    /// Checks out the specified branch.
+    ///
+    /// # Arguments
+    ///
+    /// * `branch` - The name of the branch to check out.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure.
     fn checkout(&self, branch: &str) -> Result<()>;
+
+    /// Creates a new branch with the specified name.
+    ///
+    /// # Arguments
+    ///
+    /// * `branch` - The name of the new branch.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the name of the created branch on success, or an error on failure.
     fn create_branch(&self, branch: &str) -> Result<String>;
+
+    /// Retrieves information about the current Git repository.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a tuple with three elements: the provider, owner, and repository name.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if:
+    ///
+    /// * The `git` command fails to execute.
+    /// * The current directory is not a Git repository.
     fn get_repository_info(&self) -> Result<(SupportedProviders, String, String)>;
+
+    /// Retrieves the root directory of the current Git repository.
+    ///
+    /// # Returns
+    ///
+    /// The root directory of the current Git repository as an `Option<String>`.
     fn get_repository_root(&self) -> Option<String>;
+
+    /// Retrieves the name of the current branch.
+    ///
+    /// # Returns
+    ///
+    /// The name of the current branch as an `Option<String>`.
     fn get_current_branch(&self) -> Option<String>;
+
+    /// Retrieves the title of the current commit.
+    ///
+    /// # Returns
+    ///
+    /// The title of the current commit as a `Result<String>`.
     fn get_current_commit_title(&self) -> Result<String>;
+
+    /// Deletes the specified branch.
+    ///
+    /// # Arguments
+    ///
+    /// * `branch` - The name of the branch to delete.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure.
     fn delete_branch(&self, branch: &str) -> Result<()>;
 }
 

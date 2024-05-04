@@ -22,7 +22,6 @@ impl GitCli {
 
 /// Implementation of the `GitClient` trait for the `GitCli` struct.
 impl GitClient for GitCli {
-    /// Performs an interactive commit.
     fn interactive_commit(&self) -> Result<CommitStatus> {
         // Executes the `git commit -s` command to perform an interactive commit.
         let status = Command::new("git")
@@ -37,11 +36,6 @@ impl GitClient for GitCli {
         Ok(CommitStatus::Success)
     }
 
-    /// Checks out the specified branch.
-    ///
-    /// # Arguments
-    ///
-    /// * `branch` - The name of the branch to check out.
     fn checkout(&self, branch: &str) -> Result<()> {
         // Executes the `git checkout <branch>` command to check out the specified branch.
         let output = Command::new("git")
@@ -56,15 +50,6 @@ impl GitClient for GitCli {
         Ok(())
     }
 
-    /// Creates a new branch with the specified name.
-    ///
-    /// # Arguments
-    ///
-    /// * `branch` - The name of the new branch.
-    ///
-    /// # Returns
-    ///
-    /// A `Result` containing the name of the created branch on success, or an error on failure.
     fn create_branch(&self, branch: &str) -> Result<String> {
         // Executes the `git branch <branch>` command to create a new branch.
         let output = Command::new("git").args(["branch", branch]).output();
@@ -85,18 +70,6 @@ impl GitClient for GitCli {
         }
     }
 
-    /// Retrieves information about the current Git repository.
-    ///
-    /// # Returns
-    ///
-    /// A `Result` containing a tuple with three elements: the provider, owner, and repository name.
-    ///
-    /// # Errors
-    ///
-    /// This function may return an error if:
-    ///
-    /// * The `git` command fails to execute.
-    /// * The current directory is not a Git repository.
     fn get_repository_info(&self) -> Result<(SupportedProviders, String, String)> {
         // Executes the `git remote -v` command to get information about the remote repository.
         let out = Command::new("git")
@@ -134,11 +107,6 @@ impl GitClient for GitCli {
         Ok((provider, owner, repo))
     }
 
-    /// Retrieves the root directory of the current Git repository.
-    ///
-    /// # Returns
-    ///
-    /// The root directory of the current Git repository as an `Option<String>`.
     fn get_repository_root(&self) -> Option<String> {
         // Executes the `git rev-parse --show-toplevel` command to get the root directory of the current Git repository.
         let root = Command::new("git")
@@ -159,11 +127,6 @@ impl GitClient for GitCli {
         }
     }
 
-    /// Retrieves the name of the current branch.
-    ///
-    /// # Returns
-    ///
-    /// The name of the current branch as an `Option<String>`.
     fn get_current_branch(&self) -> Option<String> {
         // Executes the `git symbolic-ref -q --short HEAD` command to get the name of the current branch.
         let branch = Command::new("git")
@@ -181,11 +144,6 @@ impl GitClient for GitCli {
         }
     }
 
-    /// Retrieves the title of the current commit.
-    ///
-    /// # Returns
-    ///
-    /// The title of the current commit as a `Result<String>`.
     fn get_current_commit_title(&self) -> Result<String> {
         // Executes the `git log -1 --pretty=%s` command to get the title of the current commit.
         let output = Command::new("git")
@@ -201,11 +159,6 @@ impl GitClient for GitCli {
         Ok(title)
     }
 
-    /// Deletes the specified branch.
-    ///
-    /// # Arguments
-    ///
-    /// * `branch` - The name of the branch to delete.
     fn delete_branch(&self, branch: &str) -> Result<()> {
         // Executes the `git branch -D <branch>` command to delete the specified branch.
         let output = Command::new("git")
