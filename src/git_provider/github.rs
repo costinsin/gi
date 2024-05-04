@@ -14,6 +14,8 @@ impl GitHub {
 impl GitProvider for GitHub {
     async fn create_pull_request(
         &self,
+        title: &String,
+        branch: &String,
         owner: &String,
         repo: &String,
         trunk: &String,
@@ -27,14 +29,12 @@ impl GitProvider for GitHub {
 
         let _pr = octocrab
             .pulls(owner, repo)
-            .create("title", "head", trunk)
+            .create(title, branch, trunk)
             .body("hello world!")
             .send()
             .await
             .context("Failed to create pull request")
             .suggestion("Please check your GitHub credentials")?;
-
-        println!("Creating pull request");
 
         Ok(())
     }

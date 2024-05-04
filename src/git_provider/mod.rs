@@ -45,6 +45,8 @@ pub fn get_provider_enum(provider: &str) -> Result<SupportedProviders> {
 pub trait GitProvider {
     async fn create_pull_request(
         &self,
+        title: &String,
+        branch: &String,
         owner: &String,
         repo: &String,
         trunk: &String,
