@@ -33,7 +33,7 @@ impl SupportedProviders {
 
 pub fn get_provider_enum(provider: &str) -> Result<SupportedProviders> {
     match provider {
-        "github" => Ok(SupportedProviders::GitHub),
+        p if p.starts_with("github") => Ok(SupportedProviders::GitHub),
         p => Err(eyre::eyre!("Unsupported provider {}", p)).suggestion(format!(
             "Supported providers: {}.\n
             Add a remote that uses one of the currently supported providers.",

@@ -86,9 +86,9 @@ impl GitClient for GitCli {
 
         // Parses the remote repository URL to extract the provider, owner, and repository name.
         let regex = if is_https {
-            Regex::new(r"https://(?P<provider>[^\.]+).*/(?P<owner>.+)/(?P<repo>.+).git").unwrap()
+            Regex::new(r"https://(?P<provider>.+)/(?P<owner>.+)/(?P<repo>.+).git").unwrap()
         } else {
-            Regex::new(r"@(?P<provider>[^\.]+).*:(?P<owner>.+)/(?P<repo>.+).git").unwrap()
+            Regex::new(r"@(?P<provider>.+):(?P<owner>.+)/(?P<repo>.+).git").unwrap()
         };
 
         let captures = regex
@@ -96,11 +96,12 @@ impl GitClient for GitCli {
             .context("Unrecognised git repository URL format")
             .suggestion("Use a HTTPS or SSH git repository URL")?;
 
-        let provider = get_provider_enum(captures.name("provider").unwrap().as_str())?;
+        let provider = captures.name("provider").unwrap().as_str();
         let owner = captures.name("owner").unwrap().as_str().to_string();
         let repo = captures.name("repo").unwrap().as_str().to_string();
+        let provider_enum = get_provider_enum(provider)?;
 
-        Ok((provider, owner, repo))
+        Ok((provider_enum, owner, repo))
     }
 
     fn get_repository_root(&self) -> Option<String> {
