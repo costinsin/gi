@@ -210,4 +210,18 @@ impl GitClient for GitCli {
 
         Ok(content)
     }
+
+    fn update_ref(&self, refname: &str, oid: &str) -> Result<()> {
+        // Executes the `git update-ref <refname> <oid>` command to update the reference with the specified name.
+        let output = Command::new("git")
+            .args(["update-ref", refname, oid])
+            .output()
+            .context("Failed to update reference")?;
+
+        if !output.status.success() {
+            return Err(eyre::eyre!("Failed to update reference"));
+        }
+
+        Ok(())
+    }
 }

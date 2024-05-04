@@ -111,6 +111,18 @@ pub trait GitClient: Send + Sync {
     ///
     /// A `Result` containing the content of the object on success, or an error on failure.
     fn read_object(&self, oid: &str) -> Result<String>;
+
+    /// Updates the reference with the specified name to point to the specified object ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `refname` - The name of the reference to update.
+    /// * `oid` - The ID of the object to update the reference to.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure.
+    fn update_ref(&self, refname: &str, oid: &str) -> Result<()>;
 }
 
 static GIT_CLIENT: Lazy<Mutex<Box<dyn GitClient>>> =
