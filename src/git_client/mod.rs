@@ -13,6 +13,12 @@ pub enum CommitStatus {
     Aborted,
 }
 
+#[derive(Debug)]
+pub struct WorkingArea {
+    pub staged_files: Vec<String>,
+    pub unstaged_files: Vec<String>,
+}
+
 /// The `GitClient` trait defines the interface for interacting with a Git repository.
 pub trait GitClient: Send + Sync {
     /// Performs an interactive commit.
@@ -89,6 +95,13 @@ pub trait GitClient: Send + Sync {
     ///
     /// A `Result` indicating success or failure.
     fn delete_branch(&self, branch: &str) -> Result<()>;
+
+    /// Retrieves the working area of the current Git repository.
+    ///
+    /// # Returns
+    ///
+    /// The working area of the current Git repository as a `Result<WorkingArea>`.
+    fn get_working_area(&self) -> Result<WorkingArea>;
 
     /// Creates a new blob with the specified content.
     ///
