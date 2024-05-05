@@ -156,6 +156,26 @@ impl GitClient for GitCli {
         Ok(title)
     }
 
+    fn get_current_commit_body(&self) -> Result<String> {
+        // Executes the `git log -1 --pretty=%b` command to get the body of the current commit.
+        let output = Command::new("git")
+            .args(["log", "-1", "--pretty=%b"])
+            .output()
+            .context("Failed to get the current commit body")?;
+
+        // Filters out the "Signed-off-by:" line from the commit body.
+        let body = String::from_utf8(output.stdout)
+            .context("Failed to parse the current commit body")?
+            .lines()
+            .filter(|line| !line.contains("Signed-off-by:"))
+            .collect::<Vec<&str>>()
+            .join("\n")
+            .trim()
+            .to_string();
+
+        Ok(body)
+    }
+
     fn delete_branch(&self, branch: &str) -> Result<()> {
         // Executes the `git branch -D <branch>` command to delete the specified branch.
         let output = Command::new("git")

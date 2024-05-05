@@ -56,9 +56,9 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
                 .suggestion("Check if you have write permissions to the .config/gi directory")?;
 
             /* TODO: Implement setting file permissions on Windows
-             At the time of writing this code, fs::Permissions::from_mode only
-             works on Unix systems. In the future, we'll find a way to perform
-             the same operation on Windows. */
+            At the time of writing this code, fs::Permissions::from_mode only
+            works on Unix systems. In the future, we'll find a way to perform
+            the same operation on Windows. */
 
             let permissions = fs::Permissions::from_mode(0o600);
             fs::set_permissions(&token_file, permissions)
@@ -88,6 +88,7 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
         title: &String,
         branch: &String,
         trunk: &String,
+        body: &String,
     ) -> Result<()> {
         let token = self.get_token()?;
 
@@ -97,14 +98,20 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
             .context("Failed to create octocrab instance")
             .suggestion("Please check your GitHub personal access token")?;
 
-        let _pr = octocrab
+        let pr = octocrab
             .pulls(owner, repo)
             .create(title, branch, trunk)
-            .body("Automatically created by Gi")
+            .body(body)
             .send()
             .await
             .context("Failed to create pull request")
             .suggestion("Please check your GitHub personal access token")?;
+
+        let pr_url = pr.html_url.ok_or_eyre("Failed to get pull request URL")?;
+        println!(
+            "\nPull request created successfully! You can check it out at:\n{}",
+            pr_url
+        );
 
         Ok(())
     }

@@ -82,6 +82,13 @@ pub trait GitClient: Send + Sync {
     /// The title of the current commit as a `Result<String>`.
     fn get_current_commit_title(&self) -> Result<String>;
 
+    /// Retrieves the body of the current commit.
+    /// 
+    /// # Returns
+    /// 
+    /// The body of the current commit as a `Result<String>`.
+    fn get_current_commit_body(&self) -> Result<String>;
+
     /// Deletes the specified branch.
     ///
     /// # Arguments
