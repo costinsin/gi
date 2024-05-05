@@ -1,6 +1,7 @@
 #![allow(async_fn_in_trait)]
 
 use core::fmt;
+use std::path::PathBuf;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
@@ -43,6 +44,9 @@ pub fn get_provider_enum(provider: &str) -> Result<SupportedProviders> {
 }
 
 pub trait GitProvider {
+    fn set_token(&self, path: &PathBuf) -> Result<String>;
+    fn get_token(&self) -> Result<String>;
+
     async fn create_pull_request(
         &self,
         owner: &String,
