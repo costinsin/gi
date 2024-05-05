@@ -270,4 +270,18 @@ impl GitClient for GitCli {
 
         Ok(())
     }
+
+    fn push_branch(&self, branch: &String) -> Result<()> {
+        // Executes the `git push origin <branch>` command to push the specified branch to the remote repository.
+        let output = Command::new("git")
+            .args(["push", "origin", branch])
+            .output()
+            .context("Failed to push branch")?;
+
+        if !output.status.success() {
+            return Err(eyre::eyre!("Failed to push branch"));
+        }
+
+        Ok(())
+    }
 }
