@@ -28,6 +28,7 @@ pub async fn submit() -> Result<()> {
     let (provider, owner, repo) = git_client.get_repository_info()?;
     let provider_obj = provider_factory(&provider)?;
 
+    git_client.push_branch(&branch)?;
     provider_obj
         .create_pull_request(&owner, &repo, &title, &branch, &trunk, &body)
         .await?;

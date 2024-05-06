@@ -140,6 +140,17 @@ pub trait GitClient: Send + Sync {
     ///
     /// A `Result` indicating success or failure.
     fn update_ref(&self, refname: &str, oid: &str) -> Result<()>;
+
+    /// Pushes the specified branch to the remote repository.
+    ///
+    /// # Arguments
+    ///
+    /// * `branch` - The name of the branch to push.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure.
+    fn push_branch(&self, branch: &String) -> Result<()>;
 }
 
 pub fn get_git_client() -> Result<Box<dyn GitClient>> {
