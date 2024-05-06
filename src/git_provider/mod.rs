@@ -114,16 +114,16 @@ pub fn ask_for_pr_body(commit_body: &String) -> Result<String> {
 
 /// Trait representing a Git provider.
 pub trait GitProvider {
-    /// Sets the token for authentication.
+    /// Sets the authentication token.
     ///
     /// # Arguments
     ///
-    /// * `path` - The path to the token file.
+    /// * `path` - The path to the file where the token should be stored.
     ///
     /// # Returns
     ///
     /// Returns a `Result` containing the token as a `String` if successful, or an error if the token cannot be set.
-    fn set_token(&self, path: &PathBuf) -> Result<String>;
+    fn ask_for_token(&self, path: &PathBuf) -> Result<String>;
 
     /// Retrieves the authentication token.
     ///
@@ -133,27 +133,23 @@ pub trait GitProvider {
     fn get_token(&self) -> Result<String>;
 
     /// Creates a pull request.
-    ///
+    /// 
     /// # Arguments
-    ///
+    /// 
     /// * `owner` - The owner of the repository.
     /// * `repo` - The name of the repository.
-    /// * `title` - The title of the pull request.
     /// * `branch` - The name of the branch to create the pull request from.
-    /// * `trunk` - The name of the branch to merge the pull request into.
-    /// * `body` - The body of the pull request.
-    ///
+    /// * `trunk` - The name of the trunk branch to create the pull request against.
+    /// 
     /// # Returns
-    ///
-    /// Returns a `Result` indicating whether the pull request was successfully created or an error occurred.
+    /// 
+    /// Returns a `Result` containing `()` if successful, or an error if the pull request cannot be created.
     async fn create_pull_request(
         &self,
         owner: &String,
         repo: &String,
-        title: &String,
         branch: &String,
         trunk: &String,
-        body: &String,
     ) -> eyre::Result<()>;
 }
 

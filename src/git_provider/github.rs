@@ -13,6 +13,11 @@ use std::os::unix::fs::PermissionsExt;
 
 use super::GitProvider;
 
+use crate::{
+    git_client,
+    git_provider::{ask_for_pr_body, ask_for_pr_title},
+};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct GitHub {}
 
@@ -23,11 +28,11 @@ impl GitHub {
 }
 
 impl GitProvider for GitHub {
-    fn set_token(&self, path: &PathBuf) -> Result<String> {
+    fn ask_for_token(&self, path: &PathBuf) -> Result<String> {
         let token = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
             .with_prompt(
                 "Set up your GitHub personal access token. You can generate one at:
-https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:user,user:email\n",
+https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:user,user:email\n",
             )
             .interact()?;
 
@@ -64,7 +69,7 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
             fs::set_permissions(&token_file, permissions)
                 .context("Failed to set permissions on token file")?;
 
-            return self.set_token(&token_file);
+            return self.ask_for_token(&token_file);
         }
 
         let data = fs::read_to_string(&token_file)
@@ -75,9 +80,9 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
         match deserealized {
             Ok(value) => match value["accessToken"].as_str() {
                 Some(token) => Ok(token.to_string()),
-                None => self.set_token(&token_file),
+                None => self.ask_for_token(&token_file),
             },
-            Err(_) => self.set_token(&token_file),
+            Err(_) => self.ask_for_token(&token_file),
         }
     }
 
@@ -85,10 +90,8 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
         &self,
         owner: &String,
         repo: &String,
-        title: &String,
         branch: &String,
         trunk: &String,
-        body: &String,
     ) -> Result<()> {
         let token = self.get_token()?;
 
@@ -97,6 +100,14 @@ https://github.com/settings/tokens/new?description=Gi&scopes=repo,read:org,read:
             .build()
             .context("Failed to create octocrab instance")
             .suggestion("Please check your GitHub personal access token")?;
+
+        let git_client = git_client::get_git_client()?;
+
+        let commit_title = git_client.get_current_commit_title()?;
+        let title = ask_for_pr_title(&commit_title)?;
+
+        let commit_body = git_client.get_current_commit_body()?;
+        let body = ask_for_pr_body(&commit_body)?;
 
         let pr = octocrab
             .pulls(owner, repo)
