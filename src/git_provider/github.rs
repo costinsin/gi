@@ -49,10 +49,15 @@ https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:
 
     fn get_token(&self) -> Result<String> {
         let home_dir = dirs::home_dir().ok_or_eyre("Failed to get home directory")?;
-        let token_file = home_dir.join(".config").join("gi").join("token");
+        let home_str = home_dir
+            .to_str()
+            .ok_or_eyre("Home directory isn't valid unicode")?;
+        let token_file = [home_str, ".config", "gi", "token"]
+            .iter()
+            .collect::<PathBuf>();
 
         if !token_file.exists() {
-            create_dir_all(home_dir.join(".config").join("gi"))
+            create_dir_all([home_str, ".config", "gi"].iter().collect::<PathBuf>())
                 .context("Failed to create gi config directory")
                 .suggestion("Check if you have write permissions to the .config directory")?;
 
