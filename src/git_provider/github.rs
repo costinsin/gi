@@ -101,7 +101,7 @@ https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:
         let token = self.get_token()?;
 
         let octocrab = octocrab::Octocrab::builder()
-            .personal_token(token)
+            .personal_token(token.clone())
             .build()
             .context("Failed to create octocrab instance")
             .suggestion("Please check your GitHub personal access token")?;
@@ -122,6 +122,14 @@ https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:
             .await
             .context("Failed to create pull request")
             .suggestion("Please check your GitHub personal access token")?;
+
+        let comment = json!({
+            "body": "Automatically created using [gi](https://github.com/costinsin/gi).",
+        });
+        let route = format!("/repos/{}/{}/issues/{}/comments", owner, repo, pr.number);
+
+        let _response: octocrab::models::issues::Comment =
+            octocrab.post(route, Some(&comment)).await?;
 
         let pr_url = pr.html_url.ok_or_eyre("Failed to get pull request URL")?;
         println!(
