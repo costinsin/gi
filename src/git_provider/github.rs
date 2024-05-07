@@ -12,6 +12,7 @@ use serde_json::json;
 use std::os::unix::fs::PermissionsExt;
 
 use super::GitProvider;
+use super::SupportedProviders;
 
 use crate::{
     git_client,
@@ -37,7 +38,7 @@ https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:
             .interact()?;
 
         let data = json!({
-            "accessToken": token
+            SupportedProviders::GitHub.to_string(): token
         });
 
         fs::write(path, data.to_string())
@@ -83,7 +84,7 @@ https://github.com/settings/tokens/new?description=gi&scopes=repo,read:org,read:
         let deserealized = serde_json::from_str::<serde_json::Value>(&data);
 
         match deserealized {
-            Ok(value) => match value["accessToken"].as_str() {
+            Ok(value) => match value[SupportedProviders::GitHub.to_string()].as_str() {
                 Some(token) => Ok(token.to_string()),
                 None => self.ask_for_token(&token_file),
             },
