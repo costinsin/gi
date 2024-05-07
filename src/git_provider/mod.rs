@@ -11,6 +11,7 @@ use eyre::{Context, OptionExt, Result};
 
 pub mod github;
 
+/// Enum representing the supported Git providers.
 #[derive(EnumIter)]
 pub enum SupportedProviders {
     GitHub,
@@ -25,6 +26,7 @@ impl fmt::Display for SupportedProviders {
 }
 
 impl SupportedProviders {
+    /// Returns a string containing the names of all supported providers.
     pub fn get_providers() -> String {
         SupportedProviders::iter()
             .map(|p| p.to_string())
@@ -33,6 +35,15 @@ impl SupportedProviders {
     }
 }
 
+/// Converts a string representation of a provider to the corresponding `SupportedProviders` enum variant.
+///
+/// # Arguments
+///
+/// * `provider` - The string representation of the provider.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the corresponding `SupportedProviders` enum variant if successful, or an error if the provider is unsupported.
 pub fn get_provider_enum(provider: &str) -> Result<SupportedProviders> {
     match provider {
         p if p.starts_with("github") => Ok(SupportedProviders::GitHub),
@@ -44,6 +55,15 @@ pub fn get_provider_enum(provider: &str) -> Result<SupportedProviders> {
     }
 }
 
+/// Asks the user to input the title for a pull request.
+///
+/// # Arguments
+///
+/// * `commit_title` - The default title to display in the input prompt.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the user-provided title as a `String` if successful, or an error if the input prompt fails.
 pub fn ask_for_pr_title(commit_title: &String) -> Result<String> {
     let title = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
         .with_prompt("Set the PR title:")
@@ -53,6 +73,15 @@ pub fn ask_for_pr_title(commit_title: &String) -> Result<String> {
     Ok(title)
 }
 
+/// Asks the user to input the body for a pull request.
+///
+/// # Arguments
+///
+/// * `commit_body` - The default body to display in the input prompt.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the user-provided body as a `String` if successful, or an error if the input prompt fails.
 pub fn ask_for_pr_body(commit_body: &String) -> Result<String> {
     let options = vec![
         "Use commit body",
@@ -83,10 +112,40 @@ pub fn ask_for_pr_body(commit_body: &String) -> Result<String> {
     Ok(body)
 }
 
+/// Trait representing a Git provider.
 pub trait GitProvider {
+    /// Sets the token for authentication.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path to the token file.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing the token as a `String` if successful, or an error if the token cannot be set.
     fn set_token(&self, path: &PathBuf) -> Result<String>;
+
+    /// Retrieves the authentication token.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing the token as a `String` if successful, or an error if the token cannot be retrieved.
     fn get_token(&self) -> Result<String>;
 
+    /// Creates a pull request.
+    ///
+    /// # Arguments
+    ///
+    /// * `owner` - The owner of the repository.
+    /// * `repo` - The name of the repository.
+    /// * `title` - The title of the pull request.
+    /// * `branch` - The name of the branch to create the pull request from.
+    /// * `trunk` - The name of the branch to merge the pull request into.
+    /// * `body` - The body of the pull request.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` indicating whether the pull request was successfully created or an error occurred.
     async fn create_pull_request(
         &self,
         owner: &String,
@@ -98,6 +157,15 @@ pub trait GitProvider {
     ) -> eyre::Result<()>;
 }
 
+/// Creates an instance of the Git provider based on the specified `SupportedProviders` enum variant.
+///
+/// # Arguments
+///
+/// * `provider` - The `SupportedProviders` enum variant representing the desired Git provider.
+///
+/// # Returns
+///
+/// Returns a `Result` containing a boxed trait object implementing the `GitProvider` trait if successful, or an error if the provider fails to initialize.
 pub fn provider_factory(provider: &SupportedProviders) -> Result<Box<impl GitProvider>> {
     match provider {
         SupportedProviders::GitHub => Ok(Box::new(github::GitHub::new()?)),
