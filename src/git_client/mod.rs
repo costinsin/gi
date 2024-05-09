@@ -15,6 +15,19 @@ pub enum CommitStatus {
 pub struct WorkingArea {
     pub staged_files: Vec<String>,
     pub unstaged_files: Vec<String>,
+    pub untracked_files: Vec<String>,
+}
+
+impl WorkingArea {
+    pub fn is_empty(&self) -> bool {
+        return self.staged_files.is_empty()
+            && self.unstaged_files.is_empty()
+            && self.untracked_files.is_empty();
+    }
+
+    pub fn has_staged_changes(&self) -> bool {
+        return !self.staged_files.is_empty();
+    }
 }
 
 /// The `GitClient` trait defines the interface for interacting with a Git repository.
@@ -163,6 +176,13 @@ pub trait GitClient: Send + Sync {
     ///
     /// A `Result` indicating success or failure.
     fn push_branch(&self, branch: &String) -> Result<()>;
+
+    /// Adds all changes in the working area to the staging area.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure.
+    fn add_all(&self) -> Result<()>;
 }
 
 pub fn get_git_client() -> Result<Box<dyn GitClient>> {
