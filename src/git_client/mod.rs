@@ -1,9 +1,10 @@
+pub mod git_cli;
+pub mod metadata;
+
 use crate::git_provider::SupportedProviders;
 
 use self::git_cli::GitCli;
 use eyre::Result;
-
-pub mod git_cli;
 
 pub enum CommitStatus {
     Success,
@@ -83,11 +84,22 @@ pub trait GitClient: Send + Sync {
     fn get_current_commit_title(&self) -> Result<String>;
 
     /// Retrieves the body of the current commit.
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// The body of the current commit as a `Result<String>`.
     fn get_current_commit_body(&self) -> Result<String>;
+
+    /// Retrieves the revision of the specified branch.
+    ///
+    /// # Arguments
+    ///
+    /// * `branch` - The name of the branch to retrieve the revision of.
+    ///
+    /// # Returns
+    ///
+    /// The revision of the specified branch as a `Result<String>`.
+    fn get_branch_revision(&self, branch: &str) -> Result<String>;
 
     /// Deletes the specified branch.
     ///

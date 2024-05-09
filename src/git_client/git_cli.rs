@@ -176,6 +176,21 @@ impl GitClient for GitCli {
         Ok(body)
     }
 
+    fn get_branch_revision(&self, branch: &str) -> Result<String> {
+        // Executes the `git rev-parse <branch>` command to get the revision of the specified branch.
+        let output = Command::new("git")
+            .args(["rev-parse", branch])
+            .output()
+            .context("Failed to get branch revision")?;
+
+        let revision = String::from_utf8(output.stdout)
+            .context("Failed to parse branch revision")?
+            .trim()
+            .to_string();
+
+        Ok(revision)
+    }
+
     fn delete_branch(&self, branch: &str) -> Result<()> {
         // Executes the `git branch -D <branch>` command to delete the specified branch.
         let output = Command::new("git")
