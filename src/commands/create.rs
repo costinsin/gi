@@ -16,6 +16,20 @@ pub fn create() -> Result<()> {
                 .suggestion("Checkout onto a branch and try again."),
         );
     };
+
+    let working_area = git_client.get_working_area()?;
+    if working_area.is_empty() {
+        return Err(eyre::eyre!(
+            "Can't create a new stacked commit without changes in the working area."
+        )
+        .suggestion("Make some changes to your files and try again."));
+    }
+
+    if !working_area.has_staged_changes() {
+        // TODO: Add a prompt to ask the user if they want to stage all changes
+        git_client.add_all()?;
+    }
+
     let temp_branch = git_client.create_branch("gi_temp_branch")?;
     git_client.checkout(&temp_branch)?;
 

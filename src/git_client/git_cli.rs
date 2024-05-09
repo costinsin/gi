@@ -228,9 +228,21 @@ impl GitClient for GitCli {
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
 
+        let untracked = Command::new("git")
+            .args(["ls-files", "--others", "--exclude-standard"])
+            .output()
+            .context("Failed to get working area status")?;
+
+        let untracked_files = String::from_utf8(untracked.stdout)
+            .context("Failed to parse untracked files")?
+            .lines()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
         Ok(super::WorkingArea {
             staged_files,
             unstaged_files,
+            untracked_files,
         })
     }
 
@@ -295,6 +307,20 @@ impl GitClient for GitCli {
 
         if !output.status.success() {
             return Err(eyre::eyre!("Failed to push branch"));
+        }
+
+        Ok(())
+    }
+
+    fn add_all(&self) -> Result<()> {
+        // Executes the `git add -A` command to add all changes in the working area to the staging area.
+        let output = Command::new("git")
+            .args(["add", "-A"])
+            .output()
+            .context("Failed to add all changes")?;
+
+        if !output.status.success() {
+            return Err(eyre::eyre!("Failed to add all changes"));
         }
 
         Ok(())
