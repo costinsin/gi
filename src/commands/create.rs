@@ -2,7 +2,10 @@ use color_eyre::Section;
 use eyre::{Context, Ok, Result};
 use regex::Regex;
 
-use crate::git_client::get_git_client;
+use crate::git_client::{
+    get_git_client,
+    metadata::{create_branch_metadata, BranchMetadata},
+};
 
 pub fn create() -> Result<()> {
     let git_client = get_git_client()?;
@@ -31,6 +34,13 @@ pub fn create() -> Result<()> {
     git_client.checkout(&new_branch)?;
 
     git_client.delete_branch(&temp_branch)?;
+
+    let base_branch_revision = git_client.get_branch_revision(&base_branch)?;
+    create_branch_metadata(
+        &git_client,
+        new_branch,
+        &BranchMetadata::new(base_branch, base_branch_revision),
+    )?;
 
     Ok(())
 }
