@@ -5,8 +5,8 @@ use std::sync::LockResult;
 pub mod cli;
 pub mod commands;
 pub mod git_client;
-pub mod project;
 pub mod git_provider;
+pub mod project;
 
 pub trait IssueError<T> {
     fn to_issue_error(self, error: &str) -> Result<T>;
