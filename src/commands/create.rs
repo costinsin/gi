@@ -1,4 +1,7 @@
+use std::vec;
+
 use color_eyre::Section;
+use dialoguer::theme::ColorfulTheme;
 use eyre::{Context, Ok, Result};
 use regex::Regex;
 
@@ -26,8 +29,23 @@ pub fn create() -> Result<()> {
     }
 
     if !working_area.has_staged_changes() {
-        // TODO: Add a prompt to ask the user if they want to stage all changes
-        git_client.add_all()?;
+        let items = vec!["Commit all changes (--all)", "Abort operation"];
+
+        let selection = dialoguer::Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("You have no staged changes. What would you like to do?")
+            .items(&items)
+            .default(0)
+            .interact()?;
+
+        match items[selection] {
+            "Commit all changes (--all)" => {
+                git_client.add_all()?;
+            }
+            "Abort operation" => {
+                return Ok(());
+            }
+            _ => unreachable!(),
+        }
     }
 
     let temp_branch = git_client.create_branch("gi_temp_branch")?;
